@@ -9,6 +9,8 @@ import os
 from alpha_vantage.timeseries import TimeSeries
 from yahoofinancials import YahooFinancials
 from datetime import datetime
+from pprint import pprint as pp
+
 
 # Constants
 ALPHA_KEY = 'FE8STYV4I7XHRIAI'
@@ -59,7 +61,7 @@ def empty_check(n) -> bool:
 
 
 # Блок скачивания цен --------------------------------------------------------------------------------------------------
-# Скачиваем нужные тикеры из альфы
+# Скачиваем нужные тикеры из альфы (не сплитованные цены)
 def download_alpha(ticker: str, base_dir: str = default_data_dir) -> pd.DataFrame:
     data = None
     global alpha_count
@@ -93,7 +95,7 @@ def download_alpha(ticker: str, base_dir: str = default_data_dir) -> pd.DataFram
     alpha_count += 1
 
 
-# Скачиваем тикеры из яху
+# Скачиваем тикеры из яху (цены и дивиденды)
 def download_yahoo(ticker: str, base_dir: str = default_data_dir) -> pd.DataFrame:
     try:
         yf = YahooFinancials(ticker)
@@ -107,18 +109,19 @@ def download_yahoo(ticker: str, base_dir: str = default_data_dir) -> pd.DataFram
         print(f'Yahoo: no data for {ticker}')
         return pd.DataFrame({})
 
-    print(data[ticker]['prices']['open'])
-
     prices = {}
     for rec in sorted(data[ticker]['prices'], key=lambda r: r['date']):
+        date = datetime.strptime(rec['formatted_date'], '%Y-%m-%d')
         if rec.get('type') is None:
-            date = datetime.strptime(rec['formatted_date'], '%Y-%m-%d')
             dic_with_prices(prices, ticker, date, rec['open'], rec['high'], rec['low'], rec['close'], rec['volume'])
+        elif rec['type'] == 'DIVIDEND':
+            dic_with_div(prices, ticker, date, rec['amount'])
+        elif rec['type'] == 'SPLIT':
+            print(f"{ticker} has split {rec['splitRatio']} for {rec['formatted_date']}")
 
-    frame = pd.DataFrame.from_dict(prices, orient='index', columns=['Open', 'High', 'Low', 'Close', 'Volume'])
+    frame = pd.DataFrame.from_dict(prices, orient='index',
+                                   columns=['Open', 'High', 'Low', 'Close', 'Volume', 'Dividend'])
     save_csv(base_dir, ticker, frame, 'yahoo')
-
-
 
 
 # Словарь с ценами
@@ -144,6 +147,22 @@ def dic_with_prices(prices: dict, ticker: str, date: datetime, open, high, low, 
         print(f'В {ticker} на {date} нет объёма')
 
     prices[date] = [open, high, low, close, volume]
+
+
+# Добавляем дивиденды к словарю с ценами
+def dic_with_div(prices: dict, ticker: str, date: datetime, amount: float):
+    if date.weekday() > 5:
+        print(f'Найден выходной в {ticker} на {date}')
+        return
+
+    dividend = amount
+    error_price = not empty_check(dividend)
+
+    if error_price:
+        print(f'В {ticker} на {date} имеются пустые данные')
+        return
+
+    prices[date].append(dividend)
 
 
 # Блок работы с файлами ------------------------------------------------------------------------------------------------
