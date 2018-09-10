@@ -159,7 +159,7 @@ def dic_with_div(prices: dict, ticker: str, date: datetime, amount: float):
     error_price = not empty_check(dividend)
 
     if error_price:
-        print(f'В {ticker} на {date} имеются пустые данные')
+        print(f'В {ticker} на {date} имеются пустые данные в дивидендах')
         return
 
     prices[date].append(dividend)
@@ -167,7 +167,7 @@ def dic_with_div(prices: dict, ticker: str, date: datetime, amount: float):
 
 # Блок работы с файлами ------------------------------------------------------------------------------------------------
 # Сохраняем csv файл
-def save_csv(base_dir: str, file_name: str, data: pd.DataFrame, source: str):
+def save_csv(base_dir: str, file_name: str, data: pd.DataFrame, source: str = 'new_file'):
     path = os.path.join(base_dir)
     if not os.path.exists(path):
         os.makedirs(path)
