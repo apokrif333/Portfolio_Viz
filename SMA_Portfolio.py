@@ -16,6 +16,8 @@ calc_SMA = False
 sma_period = 200
 
 start_capital = 10_000
+positions = len(tickers_list)
+
 
 # Calculate SMA
 def calculate_SMA(file: pd.DataFrame, ticker: str):
@@ -71,8 +73,45 @@ if __name__ == '__main__':
 
     tickers_dict['Strategy'] = pd.DataFrame({})
     for key in tickers_list:
-        tickers_dict['Strategy'][key] = [0]
+        tickers_dict['Strategy'][key+' Shares'] = [x for x in range(len(tickers_dict[sma_ticker]))]
+    tickers_dict['Strategy']['Capital'] = [x for x in range(len(tickers_dict[sma_ticker]))]
 
     pp(tickers_dict)
+
     for i in range(len(tickers_dict[tickers_list[0]])):
-        pass
+        sma = tickers_dict[sma_ticker]['Enter_' + str(sma_period)]
+        pre_capital = 0
+        capital = tickers_dict['Strategy']['Capital']
+
+        if i == 0:
+            for key in tickers_list:
+                tickers_dict['Strategy'][key+' Shares'].iloc[i] = 0
+            tickers_dict['Strategy']['Capital'].iloc[i] = start_capital
+
+        elif sma[i] == 1 and sma[i-1] == 0:
+            for key in tickers_list:
+                tickers_dict['Strategy'][key + ' Shares'].iloc[i] = capital[i-1] / positions / tickers_dict[key]['Close'][i]
+
+                pre_capital += tickers_dict['Strategy'][key + ' Shares'][i] * tickers_dict[key]['Close'][i]
+            tickers_dict['Strategy']['Capital'].iloc[i] = pre_capital
+
+        elif sma[i] == 0 and sma[i - 1] == 1:
+            for key in tickers_list:
+                dividend = tickers_dict[key]['Dividend'][i] / tickers_dict[key]['Close'][i] + 1
+                tickers_dict['Strategy'][key + ' Shares'].iloc[i] = tickers_dict['Strategy'][key + ' Shares'][i - 1] * dividend
+                pre_capital += tickers_dict['Strategy'][key + ' Shares'][i] * tickers_dict[key]['Close'][i]
+            tickers_dict['Strategy']['Capital'].iloc[i] = pre_capital
+
+        elif sma[i] == 1:
+            for key in tickers_list:
+                dividend = tickers_dict[key]['Dividend'][i] / tickers_dict[key]['Close'][i] + 1
+                tickers_dict['Strategy'][key + ' Shares'].iloc[i] = tickers_dict['Strategy'][key + ' Shares'][i - 1] * dividend
+                pre_capital += tickers_dict['Strategy'][key + ' Shares'][i] * tickers_dict[key]['Close'][i]
+            tickers_dict['Strategy']['Capital'].iloc[i] = pre_capital
+
+        elif sma[i] == 0:
+            for key in tickers_list:
+                tickers_dict['Strategy'][key + ' Shares'].iloc[i] = 0
+            tickers_dict['Strategy']['Capital'].iloc[i] = capital[i - 1]
+
+        print(i, sma[i], tickers_dict['Strategy']['Capital'].iloc[i])

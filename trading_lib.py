@@ -125,7 +125,7 @@ def download_yahoo(ticker: str, base_dir: str = default_data_dir) -> pd.DataFram
 
 
 # Словарь с ценами
-def dic_with_prices(prices: dict, ticker: str, date: datetime, open, high, low, close, volume):
+def dic_with_prices(prices: dict, ticker: str, date: datetime, open, high, low, close, volume, dividend=0):
     if date.weekday() > 5:
         print(f'Найден выходной в {ticker} на {date}')
         return
@@ -146,7 +146,7 @@ def dic_with_prices(prices: dict, ticker: str, date: datetime, open, high, low, 
     if error_vol:
         print(f'В {ticker} на {date} нет объёма')
 
-    prices[date] = [open, high, low, close, volume]
+    prices[date] = [open, high, low, close, volume, dividend]
 
 
 # Добавляем дивиденды к словарю с ценами
@@ -162,7 +162,7 @@ def dic_with_div(prices: dict, ticker: str, date: datetime, amount: float):
         print(f'В {ticker} на {date} имеются пустые данные в дивидендах')
         return
 
-    prices[date].append(dividend)
+    prices[date][len(prices[date]) - 1] = dividend
 
 
 # Блок работы с файлами ------------------------------------------------------------------------------------------------
