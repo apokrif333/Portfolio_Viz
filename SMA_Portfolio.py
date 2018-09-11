@@ -3,7 +3,6 @@ import pandas as pd
 import numpy as np
 import trading_lib as tl
 
-from datetime import datetime
 from pprint import pprint as pp
 
 
@@ -16,6 +15,7 @@ sma_ticker = 'SPY'  # Тикер из которого берётся SMA для
 calc_SMA = False
 sma_period = 200
 
+start_capital = 10_000
 
 # Calculate SMA
 def calculate_SMA(file: pd.DataFrame, ticker: str):
@@ -58,28 +58,21 @@ if __name__ == '__main__':
 
     newest_dates = []
     oldest_dates = []
-    keys = tickers_list
-    keys.append(sma_ticker)
+    keys = [sma_ticker]
+    keys += tickers_list
     for key in keys:
         newest_dates.append(tickers_dict[key]['Date'][0])
         oldest_dates.append(tickers_dict[key]['Date'].iloc[-1])
     start, end = max(newest_dates), min(oldest_dates)
 
     for key in keys:
-        start_index = tickers_dict[key]['Date'][tickers_dict[key]['Date'] == start].index[0]
-        end_index = tickers_dict[key]['Date'][tickers_dict[key]['Date'] == end].index[0]
+        tickers_dict[key] = tickers_dict[key].loc[
+            (tickers_dict[key]['Date'] >= start) & (tickers_dict[key]['Date'] <= end)].reset_index(drop=True)
 
-        tickers_dict[key].loc['Date'] = tickers_dict[key]['Date'][start_index:end_index].reset_index(drop=True)
-        # tickers_dict[key].loc['Date'] = tickers_dict[key]['Date'].iloc[start_index:end_index]
-        # if key != sma_ticker:
-        #     tickers_dict[key].loc['Open'] = tickers_dict[key]['Open'][start_index:end_index]
-        #     tickers_dict[key].loc['High'] = tickers_dict[key]['High'][start_index:end_index]
-        #     tickers_dict[key].loc['Low'] = tickers_dict[key]['Low'][start_index:end_index]
-        #     tickers_dict[key].loc['Close'] = tickers_dict[key]['Close'][start_index:end_index]
-        #     tickers_dict[key].loc['Volume'] = tickers_dict[key]['Volume'][start_index:end_index]
-        #     tickers_dict[key].loc['Dividend'] = tickers_dict[key]['Dividend'][start_index:end_index]
-        # else:
-        #     tickers_dict[key].loc['Enter_' + str(sma_period)] = tickers_dict[key]['Enter_' + str(sma_period)][
-        #                                                     start_index:end_index]
+    tickers_dict['Strategy'] = pd.DataFrame({})
+    for key in tickers_list:
+        tickers_dict['Strategy'][key] = [0]
 
-    print(tickers_dict)
+    pp(tickers_dict)
+    for i in range(len(tickers_dict[tickers_list[0]])):
+        pass
