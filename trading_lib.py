@@ -207,9 +207,8 @@ def correct_file_by_dates(file: pd.DataFrame, start: datetime, end: datetime) ->
 
 # Блок финансовых метрик -----------------------------------------------------------------------------------------------
 # Считаем CAGR
-def cagr(file: pd.DataFrame, capital: list) -> float:
-    years = (file["Date"].iloc[-1].year + file["Date"].iloc[-1].month / 12) - \
-            (file["Date"].iloc[0].year + file["Date"].iloc[0].month / 12)
+def cagr(date: list, capital: list) -> float:
+    years = (date[-1].year + date[-1].month / 12) - (date[0].year + date[0].month / 12)
     return ((capital[-1] / capital[0]) ** (1 / years) - 1) * 100
 
 
@@ -252,3 +251,58 @@ def oldest_date_search(f_date: datetime, *args: datetime) -> datetime:
         if arg < oldest_date:
             oldest_date = arg
     return oldest_date
+
+
+# Рисовалка ------------------------------------------------------------------------------------------------------------
+# Выводим график капитала с таблицей
+def plot_capital(date: list, capital: list):
+    high = 0
+    down = []
+    for i in range(len(capital)):
+        if capital[i] > high:
+            high = capital[i]
+        down.append((capital[i] / high - 1) * -100)
+
+    names = ['Start Balance', 'End Balance', 'CAGR', 'DrawDown', 'StDev', 'Sharpe', 'MaR', 'SM']
+    values = []
+    values.append(capital[0])
+    values.append(round(capital[-1], 0))
+    values.append(round(cagr(file, capital), 2))
+    values.append(round(draw_down(capital), 2))
+    values.append(round(st_dev(capital) * 100, 2))
+    values.append(round(values[2] / values[4], 2))
+    values.append(round(abs(values[2] / values[3]), 2))
+    values.append(round(values[5] * values[6], 2))
+
+    for key in years_dict.keys():
+        names.append(key)
+        values.append(years_dict[key])
+    while len(names) % 4 != 0:
+        names.append('')
+        values.append('')
+
+    table_metric = pd.DataFrame({'h1': names[:int(len(names) / 4)],
+                                 'v1': values[:int(len(values) / 4)],
+                                 'h2': names[int(len(names) / 4):int(len(names) / 2)],
+                                 'v2': values[int(len(values) / 4):int(len(values) / 2)],
+                                 'h3': names[int(len(names) / 2):int(len(names) * 0.75)],
+                                 'v3': values[int(len(values) / 2):int(len(values) * 0.75)],
+                                 'h4': names[int(len(names) * 0.75):len(names)],
+                                 'v4': values[int(len(values) * 0.75):len(values)],
+                                 })
+
+    fig = plt.figure(figsize=(12.8, 8.6), dpi=80)
+
+    ax1 = fig.add_subplot(6, 1, (1, 5))
+    ax1.plot(file['Date'], down, dashes=[6, 4], color="darkgreen", alpha=0.5)
+    ax1.set_ylabel('Просадки')
+
+    ax2 = ax1.twinx()
+    ax2.plot(file['Date'], capital)
+    ax2.set_ylabel('Динамика капитала')
+
+    tx1 = fig.add_subplot(6, 1, 6, frameon=False)
+    tx1.axis("off")
+    tx1.table(cellText=table_metric.values, loc='lower center')
+
+    plt.show()

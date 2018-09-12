@@ -40,6 +40,7 @@ def calculate_SMA(file: pd.DataFrame, ticker: str):
 
 
 if __name__ == '__main__':
+    # Download data and create single dict
     tickers_dict = {}
     for t in tickers_list:
         if os.path.isfile(os.path.join(def_data_direct, str(t) + '.csv')) is False or download_data:
@@ -48,9 +49,11 @@ if __name__ == '__main__':
         tl.str_list_to_date(cur_base)
         tickers_dict[str(t)] = cur_base
 
+    # Download data for sma_ticker
     if os.path.isfile(os.path.join(def_data_direct, sma_ticker + '.csv')) is False or download_data:
         tl.download_yahoo(sma_ticker)
 
+    # Calculation SMA
     sma_ticker_base = tl.load_csv(sma_ticker)
     if calc_SMA:
         calculate_SMA(sma_ticker_base, sma_ticker)
@@ -58,6 +61,7 @@ if __name__ == '__main__':
     tickers_dict[sma_ticker] = sma_ticker_base[['Date', 'Enter_' + str(sma_period)]]
     # pp(tickers_dict['DIA']['Close'][tickers_dict['DIA']['Close'] == 81.66].index[2])
 
+    # Find start, end dates
     newest_dates = []
     oldest_dates = []
     keys = [sma_ticker]
@@ -67,16 +71,16 @@ if __name__ == '__main__':
         oldest_dates.append(tickers_dict[key]['Date'].iloc[-1])
     start, end = max(newest_dates), min(oldest_dates)
 
+    # Correct dict by dates
     for key in keys:
         tickers_dict[key] = tickers_dict[key].loc[
             (tickers_dict[key]['Date'] >= start) & (tickers_dict[key]['Date'] <= end)].reset_index(drop=True)
 
+    # Create sub-dict for strategy calculation
     tickers_dict['Strategy'] = pd.DataFrame({})
     for key in tickers_list:
         tickers_dict['Strategy'][key+' Shares'] = [x for x in range(len(tickers_dict[sma_ticker]))]
     tickers_dict['Strategy']['Capital'] = [x for x in range(len(tickers_dict[sma_ticker]))]
-
-    pp(tickers_dict)
 
     for i in range(len(tickers_dict[tickers_list[0]])):
         sma = tickers_dict[sma_ticker]['Enter_' + str(sma_period)]
@@ -90,22 +94,24 @@ if __name__ == '__main__':
 
         elif sma[i] == 1 and sma[i-1] == 0:
             for key in tickers_list:
-                tickers_dict['Strategy'][key + ' Shares'].iloc[i] = capital[i-1] / positions / tickers_dict[key]['Close'][i]
-
+                tickers_dict['Strategy'].loc[i, key + ' Shares'] = capital[i - 1] / positions / \
+                                                                   tickers_dict[key]['Close'][i]
                 pre_capital += tickers_dict['Strategy'][key + ' Shares'][i] * tickers_dict[key]['Close'][i]
             tickers_dict['Strategy']['Capital'].iloc[i] = pre_capital
 
         elif sma[i] == 0 and sma[i - 1] == 1:
             for key in tickers_list:
                 dividend = tickers_dict[key]['Dividend'][i] / tickers_dict[key]['Close'][i] + 1
-                tickers_dict['Strategy'][key + ' Shares'].iloc[i] = tickers_dict['Strategy'][key + ' Shares'][i - 1] * dividend
+                tickers_dict['Strategy'].loc[i, key + ' Shares'] = tickers_dict['Strategy'][key + ' Shares'][
+                                                                       i - 1] * dividend
                 pre_capital += tickers_dict['Strategy'][key + ' Shares'][i] * tickers_dict[key]['Close'][i]
             tickers_dict['Strategy']['Capital'].iloc[i] = pre_capital
 
         elif sma[i] == 1:
             for key in tickers_list:
                 dividend = tickers_dict[key]['Dividend'][i] / tickers_dict[key]['Close'][i] + 1
-                tickers_dict['Strategy'][key + ' Shares'].iloc[i] = tickers_dict['Strategy'][key + ' Shares'][i - 1] * dividend
+                tickers_dict['Strategy'].loc[i, key + ' Shares'] = tickers_dict['Strategy'][key + ' Shares'][
+                                                                       i - 1] * dividend
                 pre_capital += tickers_dict['Strategy'][key + ' Shares'][i] * tickers_dict[key]['Close'][i]
             tickers_dict['Strategy']['Capital'].iloc[i] = pre_capital
 
@@ -114,4 +120,12 @@ if __name__ == '__main__':
                 tickers_dict['Strategy'][key + ' Shares'].iloc[i] = 0
             tickers_dict['Strategy']['Capital'].iloc[i] = capital[i - 1]
 
-        print(i, sma[i], tickers_dict['Strategy']['Capital'].iloc[i])
+        print(i, sma[i], tickers_dict['Strategy']['Capital'][i] )
+
+    # Create strategy file
+    tickers_dict['Strategy']['Date'] = tickers_dict[sma_ticker]['Date']
+    for key in tickers_list:
+        tickers_dict['Strategy'][key + ' Close'] = tickers_dict[key]['Close']
+        tickers_dict['Strategy'][key + ' Dividend'] = tickers_dict[key]['Dividend']
+
+    tl.save_csv(def_data_direct, 'SMA_calc ' + str(sma_period), tickers_dict['Strategy'])
