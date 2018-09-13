@@ -5,6 +5,7 @@ import math
 import time
 import cmath
 import os
+import matplotlib.pyplot as plt
 
 from alpha_vantage.timeseries import TimeSeries
 from yahoofinancials import YahooFinancials
@@ -15,12 +16,10 @@ from pprint import pprint as pp
 # Constants
 ALPHA_KEY = 'FE8STYV4I7XHRIAI'
 
-
 # Variables
 default_data_dir = 'exportTables'  # Директория
 start_date = datetime(1990, 1, 1)  # Для yahoo, alpha выкачает всю доступную историю
 end_date = datetime.now()
-
 
 # Globals
 alpha_count = 0
@@ -267,16 +266,13 @@ def plot_capital(date: list, capital: list):
     values = []
     values.append(capital[0])
     values.append(round(capital[-1], 0))
-    values.append(round(cagr(file, capital), 2))
+    values.append(round(cagr(date, capital), 2))
     values.append(round(draw_down(capital), 2))
     values.append(round(st_dev(capital) * 100, 2))
     values.append(round(values[2] / values[4], 2))
     values.append(round(abs(values[2] / values[3]), 2))
     values.append(round(values[5] * values[6], 2))
 
-    for key in years_dict.keys():
-        names.append(key)
-        values.append(years_dict[key])
     while len(names) % 4 != 0:
         names.append('')
         values.append('')
@@ -294,11 +290,11 @@ def plot_capital(date: list, capital: list):
     fig = plt.figure(figsize=(12.8, 8.6), dpi=80)
 
     ax1 = fig.add_subplot(6, 1, (1, 5))
-    ax1.plot(file['Date'], down, dashes=[6, 4], color="darkgreen", alpha=0.5)
+    ax1.plot(date, down, dashes=[6, 4], color="darkgreen", alpha=0.5)
     ax1.set_ylabel('Просадки')
 
     ax2 = ax1.twinx()
-    ax2.plot(file['Date'], capital)
+    ax2.plot(date, capital)
     ax2.set_ylabel('Динамика капитала')
 
     tx1 = fig.add_subplot(6, 1, 6, frameon=False)
