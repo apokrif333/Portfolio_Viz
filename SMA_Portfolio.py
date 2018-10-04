@@ -1,6 +1,9 @@
 import os
 import pandas as pd
 import numpy as np
+import sys
+
+sys.path.insert(0, 'C:/Users/Lex/PycharmProjects/Start/GitHub/My_Libs') 
 import trading_lib as tl
 
 from datetime import datetime
@@ -8,11 +11,11 @@ from pprint import pprint as pp
 
 
 # Variables
-newest_dates = [datetime(2003, 1, 1)]  # Стартовая дата (можно не указывать)
+newest_dates = [datetime(2007, 1, 1)]  # Стартовая дата (можно не указывать)
 oldest_dates = [datetime.now()]  # Конечная дата (можно не указывать)
 
 def_data_direct = 'exportTables'
-tickers_list = ['QQQ', 'DIA', 'IBB']  # Список тикеров для портфеля
+tickers_list = ['FBT', 'DIA', 'QLD']  # Список тикеров для портфеля 'IGV', 'ARKK', 'FXH', 'XAR'
 
 sma_ticker = 'SPY'  # Тикер из которого берётся SMA для конца месяца
 sma_period = 200
@@ -20,8 +23,8 @@ sma_period = 200
 start_capital = 10_000
 
 download_data = False  # Если не нужно перекачивать все инструменты False
-calc_SMA = True
-hedge_ticker = ''  # Тикер в который порт будет уходить для хэджа
+calc_SMA = False
+hedge_ticker = 'TLT'  # Тикер в который порт будет уходить для хэджа
 chart_or_save = 1  # 1 вывести итоговый график, -1 сохранить файл, 0 вывести график и сохранить файл
 positions = len(tickers_list)
 
