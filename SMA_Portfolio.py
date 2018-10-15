@@ -15,7 +15,7 @@ newest_dates = [datetime(2007, 1, 1)]  # Стартовая дата (можно
 oldest_dates = [datetime.now()]  # Конечная дата (можно не указывать)
 
 def_data_direct = 'exportTables'
-tickers_list = ['FBT', 'DIA', 'QLD']  # Список тикеров для портфеля 'IGV', 'ARKK', 'FXH', 'XAR'
+tickers_list = ['FBT', 'ITA', 'QQQ', 'FXH']  # Список тикеров для портфеля 'IGV', 'ARKK', 'FXH', 'XAR'
 
 sma_ticker = 'SPY'  # Тикер из которого берётся SMA для конца месяца
 sma_period = 200
