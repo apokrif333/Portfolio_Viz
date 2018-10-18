@@ -13,15 +13,15 @@ newest_dates = [datetime(2007, 1, 1)]  # Стартовая дата (можно
 oldest_dates = [datetime.now()]  # Конечная дата (можно не указывать)
 
 def_data_direct = 'exportTables'
-tickers_list = ['QQQ', 'DIA', 'XLP', 'XLV', 'IEI', 'IEI']  # Список тикеров для портфеля 'FBT', 'ITA', 'QQQ', 'FXH'
+tickers_list = ['QQQ', 'XLP', 'XLV', 'IEI', 'IEI']  # Список тикеров для портфеля 'FBT', 'ITA', 'QQQ', 'FXH'
 
-sma_ticker = 'SPY'  # Тикер из которого берётся SMA для конца месяца
+sma_ticker = 'DIA'  # Тикер из которого берётся SMA для конца месяца
 sma_period = 200
 
 start_capital = 1_000_000
 
 download_data = 0  # Если не нужно перекачивать все инструменты False
-calc_SMA = 0
+calc_SMA = 1
 hedge_ticker = 'IEF'  # Тикер в который порт будет уходить для хэджа
 chart_or_save = 1  # 1 вывести итоговый график, -1 сохранить файл, 0 вывести график и сохранить файл
 positions = len(tickers_list)
@@ -100,7 +100,7 @@ if __name__ == '__main__':
             
         elif i == 0 and sma[i] == 1:
             for key in tickers_list:
-                td_S.loc[i, key + ' Shares'] = start_capital / positions / tickers_dict[key]['Close'][i]
+                td_S.loc[i, key+' Shares'] = start_capital / positions / tickers_dict[key]['Close'][i]
             if hedge_ticker != '':
                 td_S.loc[i, hedge_ticker + ' Shares'] = 0
             td_S.loc[i, 'Capital'] = start_capital
