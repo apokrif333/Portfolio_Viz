@@ -13,14 +13,14 @@ newest_dates = [datetime(2000, 9, 1)]  # Стартовая дата (можно
 oldest_dates = [datetime.now()]  # Конечная дата (можно не указывать)
 
 def_data_direct = 'exportTables'
-tickers_list = ['QQQ', 'FXH', 'ITA', 'FBT']  # Список тикеров для портфеля 'FBT', 'ITA', 'QQQ', 'FXH'
+tickers_list = ['ARKK', 'FINX', 'FXH', 'IBUY', 'IGV', 'PSCH', 'XAR']  # Список тикеров для портфеля 'FBT', 'ITA', 'QQQ', 'FXH'
 
 sma_ticker = 'SPY'  # Тикер из которого берётся SMA для конца месяца
 sma_period = 200
 
 start_capital = 1_000_000
 
-download_data = 0  # Если не нужно перекачивать все инструменты False
+download_data = 1  # Если не нужно перекачивать все инструменты False
 calc_SMA = 0 if download_data == 0 else 1
 hedge_ticker = 'IEF'  # Тикер в который порт будет уходить для хэджа
 chart_or_save = 1  # 1 вывести итоговый график, -1 сохранить файл, 0 вывести график и сохранить файл
