@@ -9,13 +9,10 @@ def create_daily_prices(df: pd.DataFrame):
     yields_list = []
     yields_indexes = []
 
-    end_row = 0
-    while math.isnan(df['Effective FED rate'][end_row]):
-        end_row += 1
-
-    for i in range(end_row+1):
-        if math.isnan(df['Bonds Yield Close'][i]) == False:
-            yields_list.append(df['Bonds Yield Close'][i])
+    df['BAA Yield Close'] = df['BAA Yield Close'].astype('float', copy=False)
+    for i in range(6679, len(df)):
+        if math.isnan(df['BAA Yield Close'][i]) == False:
+            yields_list.append(df['BAA Yield Close'][i])
             yields_indexes.append(i)
 
     print(yields_list)
@@ -26,16 +23,14 @@ def create_daily_prices(df: pd.DataFrame):
         print(every_day_add * 100)
 
         for j in range(yields_indexes[i-1]+1, yields_indexes[i]):
-            df.loc[j, 'Bonds Yield Close'] = df['Bonds Yield Close'][j-1] + every_day_add
+            df.loc[j, 'BAA Yield Close'] = df['BAA Yield Close'][j-1] + every_day_add
 
     df.to_csv('Total.csv')
 
 
 # df.fillna(method='ffill').to_csv('Total.csv')
-df = pd.read_excel('Total.xlsx')
-create_daily_prices(df)
+df = pd.read_csv('Total.csv')
 
-input()
 # Das ist Plotly time
 trace1 = go.Scatter(
     x=df['Date'],
@@ -45,12 +40,19 @@ trace1 = go.Scatter(
 )
 trace2 = go.Scatter(
     x=df['Date'],
-    y=df['S&P price'],
+    y=df['BAA 20+ price'],
     mode='lines',
-    name='S&P price',
-    yaxis='y2'
+    name='BAA 20+ price',
+    # yaxis='y1'
 )
 trace3 = go.Scatter(
+    x=df['Date'],
+    y=df['DJA'],
+    mode='lines',
+    name='DJA price',
+    yaxis='y2'
+)
+trace4 = go.Scatter(
     x=df['Date'],
     y=df['Effective FED rate'],
     mode='lines',
@@ -58,7 +60,7 @@ trace3 = go.Scatter(
     yaxis='y3'
 )
 
-plt_data = [trace1, trace2, trace3]
+plt_data = [trace1, trace2, trace3, trace4]
 
 plt_layout = go.Layout(
     title='Compare Stocks and Bonds',
