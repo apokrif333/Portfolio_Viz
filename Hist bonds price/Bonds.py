@@ -36,27 +36,30 @@ trace1 = go.Scatter(
     x=df['Date'],
     y=df['Bond price'],
     mode='lines',
-    name='Bond price'
+    line=dict(color='#1f77b4'),
+    name='Treasure 10+'
 )
 trace2 = go.Scatter(
     x=df['Date'],
     y=df['BAA 20+ price'],
     mode='lines',
-    name='BAA 20+ price',
-    # yaxis='y1'
+    line=dict(color='blueviolet'),
+    name='Corporate BAA 20+',
 )
 trace3 = go.Scatter(
     x=df['Date'],
     y=df['DJA'],
     mode='lines',
-    name='DJA price',
+    line=dict(color='#ff7f0e'),
+    name='Dow Jones',
     yaxis='y2'
 )
 trace4 = go.Scatter(
     x=df['Date'],
     y=df['Effective FED rate'],
     mode='lines',
-    name='Effective FED rate',
+    line=dict(color='#2ca02c'),
+    name='FED rate',
     yaxis='y3'
 )
 
@@ -65,15 +68,15 @@ plt_data = [trace1, trace2, trace3, trace4]
 plt_layout = go.Layout(
     title='Compare Stocks and Bonds',
     xaxis=dict(
-        domain=[0.04, 1]
+        domain=[0.0, 0.96]
     ),
     yaxis=dict(
-        title='Bond price',
+        title='Bonds price',
         titlefont=dict(color='#1f77b4'),
         tickfont=dict(color='#1f77b4')
     ),
     yaxis2=dict(
-        title='S&P price',
+        title='DJI price',
         titlefont=dict(color='#ff7f0e'),
         tickfont=dict(color='#ff7f0e'),
         type='log',
@@ -86,8 +89,8 @@ plt_layout = go.Layout(
         titlefont=dict(color='#2ca02c'),
         tickfont=dict(color='#2ca02c'),
         overlaying='y',
-        side='left',
-        position=0.0
+        side='right',
+        position=1.0
     )
 )
 
@@ -95,4 +98,4 @@ fig = go.Figure(
     data=plt_data,
     layout=plt_layout
 )
-plot(fig, show_link=False, filename='Bond and SPY prices.html')
+plot(fig, show_link=False, filename='Compare Stocks and Bonds.html')
