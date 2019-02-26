@@ -2,16 +2,20 @@ from plotly.offline import plot
 from plotly import graph_objs as go
 
 import math
-import pandas as pd; pd.options.display.max_columns = 20; pd.options.display.max_rows = 50_000
+import pandas as pd; pd.options.display.max_columns = 20; pd.options.display.max_rows = 100
 
 
-def create_daily_prices():
+def create_daily_prices(df: pd.DataFrame):
     yields_list = []
     yields_indexes = []
 
-    for i in range(5_991):
-        if math.isnan(df.Close[i]) == False:
-            yields_list.append(df.Close[i])
+    end_row = 0
+    while math.isnan(df['Effective FED rate'][end_row]):
+        end_row += 1
+
+    for i in range(end_row+1):
+        if math.isnan(df['Bonds Yield Close'][i]) == False:
+            yields_list.append(df['Bonds Yield Close'][i])
             yields_indexes.append(i)
 
     print(yields_list)
@@ -22,14 +26,16 @@ def create_daily_prices():
         print(every_day_add * 100)
 
         for j in range(yields_indexes[i-1]+1, yields_indexes[i]):
-            df.loc[j, 'Close'] = df.Close[j-1] + every_day_add
+            df.loc[j, 'Bonds Yield Close'] = df['Bonds Yield Close'][j-1] + every_day_add
 
-    df.to_csv('^TYX (corr).csv')
+    df.to_csv('Total.csv')
 
 
 # df.fillna(method='ffill').to_csv('Total.csv')
-df = pd.read_csv('Total.csv')
+df = pd.read_excel('Total.xlsx')
+create_daily_prices(df)
 
+input()
 # Das ist Plotly time
 trace1 = go.Scatter(
     x=df['Date'],
