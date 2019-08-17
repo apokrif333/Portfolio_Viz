@@ -8,14 +8,14 @@ sys.path.insert(0, 'C:/Users/Tom/PycharmProjects/Start/GibHub/My_Libs')
 import trading_lib as tl
 
 # Variables
-newest_dates = [datetime(2019, 1, 1)]  # Стартовая дата (можно не указывать)
+newest_dates = [datetime(2002, 1, 1)]  # Стартовая дата (можно не указывать)
 oldest_dates = [datetime.now()]  # Конечная дата (можно не указывать)
 
 def_data_direct = 'exportTables'
-tickers_list = ['FDN', 'FBT', 'ITA']  # Список тикеров для портфеля 'FBT', 'ITA', 'QQQ', 'FXH'
+tickers_list = ['QQQ', 'EEM']  # Список тикеров для портфеля 'FBT', 'ITA', 'QQQ', 'FXH'
 
 sma_ticker = 'SPY'  # Тикер из которого берётся SMA для конца месяца
-sma_period = 200
+sma_period = 100
 
 start_capital = 39_400
 
